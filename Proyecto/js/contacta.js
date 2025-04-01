@@ -1,34 +1,30 @@
-document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("contactForm").addEventListener("submit", function (event) {
-        event.preventDefault();
+import { db, collection, addDoc } from "../js/firebase.js";
 
-        let nombre = document.getElementById("nombre").value.trim();
-        let correo = document.getElementById("correo").value.trim();
-        let mensaje = document.getElementById("mensaje").value.trim();
+document.getElementById("contactForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-        if (nombre === "" || correo === "" || mensaje === "") {
-            alert("Por favor, completa todos los campos.");
-            return;
-        }
+    let nombre = document.getElementById("nombre").value.trim();
+    let correo = document.getElementById("correo").value.trim();
+    let mensaje = document.getElementById("mensaje").value.trim();
 
-        let datos = {
-            title: nombre, 
-            body: mensaje,
-        };
+    if (nombre === "" || correo === "" || mensaje === "") {
+        alert(" Por favor, completa todos los campos.");
+        return;
+    }
 
-        fetch("https://jsonplaceholder.typicode.com/posts", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(datos)
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Respuesta de la API:", data);
-            document.getElementById("mensajeExito").style.display = "block";
-            document.getElementById("contactForm").reset();
-        })
-        .catch(error => console.error("Error:", error));
-    });
+    try {
+        console.log(" Intentando guardar en Firebase");
+        let docRef = await addDoc(collection(db, "contactos"), {
+            nombre: nombre,
+            correo: correo,
+            mensaje: mensaje,
+            timestamp: new Date()
+        });
+        console.log("Mensaje guardado con ID:", docRef.id);
+        alert("Mensaje enviado correctamente");
+        document.getElementById("contactForm").reset();
+    } catch (error) {
+        console.error(" Error al guardar en Firebase:", error);
+        alert("Hubo un error al enviar el mensaje.");
+    }
 });
